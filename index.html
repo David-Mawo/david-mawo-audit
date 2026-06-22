@@ -889,6 +889,128 @@ async function saveAnonymousLead(){
   } catch(e){ console.log('Anonymous save failed:', e); }
 }
 
+
+function getPersonalizedMessage(profile, totalScore, tags) {
+  const age    = profile.age    || '';
+  const employ = profile.employ || '';
+  const score  = totalScore;
+
+  const BOOKING = 'In our first conversation, I will evaluate your current situation, identify the specific strategies that apply to you, and show you a financial projection comparing where you are headed today versus what an optimized plan could deliver. No obligation — just clarity.';
+  const CTA     = 'Book your free strategy session';
+
+  // ── Group 3: Incorporated ──────────────────────────────────────────────────
+  if (employ === 'corp') {
+    if (score <= 39) return {
+      headline: 'Your corporation may be working against you.',
+      body: 'Your results show that your retained earnings are likely being taxed inefficiently, and without the right structure you may be paying more personal tax than necessary. The Capital Dividend Account, corporate-owned life insurance, and the Insured Retirement Plan are strategies designed specifically for incorporated Albertans — and most have never been shown them. This conversation could be worth hundreds of thousands of dollars over your career.',
+      cta: BOOKING + ' ' + CTA
+    };
+    if (score <= 69) return {
+      headline: 'You understand the basics — but gaps remain.',
+      body: 'Your results suggest you are likely leaving corporate tax advantages on the table. The difference between a good plan and an optimal one for an incorporated professional often comes down to one or two strategies — the CDA, CSV lending, or a properly structured buy-sell agreement. Let's identify exactly which ones apply to your situation.',
+      cta: BOOKING + ' ' + CTA
+    };
+    return {
+      headline: 'Your financial literacy is exceptional.',
+      body: 'At your level, the conversation shifts from education to execution — ensuring your corporate structure, life insurance, and estate plan are fully integrated. The difference between good and optimal at this stage is significant and measurable.',
+      cta: BOOKING + ' ' + CTA
+    };
+  }
+
+  // ── Group 4: Pre-retirees (45–59 or 60+) ──────────────────────────────────
+  if (age === '40s' || age === '60p' || employ === 'retired') {
+    if (score <= 39) return {
+      headline: 'Retirement is closer than your plan may be ready for.',
+      body: 'The decisions you make in the next 5–10 years — when to take CPP, how to draw down your RRSP, how to structure your estate — will determine your financial reality for the rest of your life. These are not decisions to leave to chance or revisit later. Let's build a clear roadmap while there is still time to optimize.',
+      cta: BOOKING + ' ' + CTA
+    };
+    if (score <= 69) return {
+      headline: 'Good foundation — but critical gaps remain.',
+      body: 'Your results reveal gaps in RRIF drawdown strategy and estate planning that are extremely common at your stage. Many pre-retirees lose tens of thousands of dollars in unnecessary tax because of the order in which they draw from their accounts. A retirement income plan built now could make a significant difference to what you and your family keep.',
+      cta: BOOKING + ' ' + CTA
+    };
+    return {
+      headline: 'You are well positioned — now let's stress-test your plan.',
+      body: 'Your knowledge is strong. The opportunity at your stage is to validate your plan against real scenarios — market downturns, a health event, a surviving spouse — and ensure your estate plan reflects your current wishes and minimizes the tax burden on your estate.',
+      cta: BOOKING + ' ' + CTA
+    };
+  }
+
+  // ── Group 1: Young professionals (Under 30) ────────────────────────────────
+  if (age === 'u30') {
+    if (score <= 39) return {
+      headline: 'You are earlier than you think — and that is your biggest advantage.',
+      body: 'Your results show you are just getting started with financial planning, and that is actually good news. The strategies that build the most wealth work best when started early. Your FHSA alone could save you up to $40,000 tax-free toward your first home, and a properly structured life insurance policy started at your age costs a fraction of what it will later. The gap between where you are and where you could be is closeable — but the window is short.',
+      cta: BOOKING + ' ' + CTA
+    };
+    if (score <= 69) return {
+      headline: 'Solid foundation — but gaps will compound if left open.',
+      body: 'Your results reveal gaps in protection and tax strategy that could cost you significantly over the next decade. Most young professionals in your position are maximizing their TFSA but missing the FHSA and the right disability coverage. One conversation could close those gaps before they compound.',
+      cta: BOOKING + ' ' + CTA
+    };
+    return {
+      headline: 'You are ahead of your peers — now let's optimize.',
+      body: 'The next level for someone at your stage is building a tax-efficient foundation that will serve you whether you stay salaried or move toward self-employment. Let's make sure your strategy is built for where you are going, not just where you are.',
+      cta: BOOKING + ' ' + CTA
+    };
+  }
+
+  // ── Group 2: Growing families (30–44, salaried with kids implied) ──────────
+  if (age === '30s') {
+    if (score <= 39) return {
+      headline: 'Your family may be more exposed than you realize.',
+      body: 'Your results reveal significant gaps — particularly around income protection and estate planning. If something happened to you tomorrow, would your family be financially secure? Most families at your stage are one disability or death away from a financial crisis they did not see coming. This is the most important conversation you can have right now.',
+      cta: BOOKING + ' ' + CTA
+    };
+    if (score <= 69) return {
+      headline: 'You are doing several things right — but gaps remain.',
+      body: 'Your results show gaps in RESP optimization and life insurance structuring that are common at your stage. Many families are underinsured by 40% or more without realizing it. A 30-minute review could identify exactly where your plan is exposed and what it would cost to close those gaps.',
+      cta: BOOKING + ' ' + CTA
+    };
+    return {
+      headline: 'Your financial literacy is strong — now make it a system.',
+      body: 'The opportunity now is to ensure your protection, savings, and estate plan are working together rather than as separate products. Let's review whether your current coverage and beneficiary designations reflect where your family is today.',
+      cta: BOOKING + ' ' + CTA
+    };
+  }
+
+  // ── Group 6: Contractors / freelancers (small business owners) ────────────
+  if (employ === 'contract') {
+    if (score <= 39) return {
+      headline: 'Building a business without a financial foundation is high risk.',
+      body: 'Your results show that while you are building your business, your personal financial plan may be significantly exposed. Business owners without the right structure often have no pension, insufficient life and disability coverage, and no separation between personal and business risk. One health event or business disruption could undo years of work.',
+      cta: BOOKING + ' ' + CTA
+    };
+    if (score <= 69) return {
+      headline: 'Good awareness — but gaps your accountant may not flag.',
+      body: 'Your results reveal gaps in business succession planning and key person protection that are extremely common among independent contractors and small business owners. These are gaps your accountant may not flag because they fall outside their scope. Let's identify what is missing before it becomes a crisis.',
+      cta: BOOKING + ' ' + CTA
+    };
+    return {
+      headline: 'Strong literacy — now integrate your personal and business plans.',
+      body: 'The opportunity now is to ensure your personal and business financial plans are fully integrated — particularly around succession, disability coverage, and your eventual transition out of the business. Let's make sure the value you have built is protected.',
+      cta: BOOKING + ' ' + CTA
+    };
+  }
+
+  // ── Default (salaried, age not yet matched, or new Canadians) ─────────────
+  if (score <= 39) return {
+    headline: 'There is significant room to strengthen your financial position.',
+    body: 'Your results show that several key pillars of your financial plan have gaps that, left open, will cost you over time. The good news is that the right strategies — properly sequenced — can make a measurable difference to your financial trajectory. The Canadian system offers tools most people never fully use.',
+    cta: BOOKING + ' ' + CTA
+  };
+  if (score <= 69) return {
+    headline: 'You have a foundation — now let's build on it.',
+    body: 'Your results show you understand the basics but are likely missing some of the more powerful strategies available to you. The gap between a good financial plan and an optimal one is often one or two targeted decisions. Let's identify exactly which ones apply to your situation.',
+    cta: BOOKING + ' ' + CTA
+  };
+  return {
+    headline: 'Your financial literacy is strong — let's validate your plan.',
+    body: 'At your level, the conversation is less about education and more about ensuring your existing plan is fully optimized and stress-tested. A second set of eyes from a specialist can confirm what is working and surface what may be quietly costing you.',
+    cta: BOOKING + ' ' + CTA
+  };
+}
+
 async function sendEmails(name, email, phone, scores, totalScore, tags, profile){
   const tierLabel = totalScore>=80?'Strong literacy':totalScore>=60?'Developing':totalScore>=40?'Foundational':'Awareness gaps';
   const catRows = Object.entries({
@@ -937,14 +1059,22 @@ async function sendEmails(name, email, phone, scores, totalScore, tags, profile)
   </table>
 </td></tr>
 
+<!-- Personalized message block (computed before template) -->
+${(()=>{const m=getPersonalizedMessage(profile,totalScore,tags);return `
+<!-- Personalized insight -->
+<tr><td style="background:#F8F9FB;padding:28px 32px;border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;">
+  <p style="margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#B8973A;font-weight:600;">What this means for you</p>
+  <p style="margin:0 0 10px;font-size:17px;font-weight:600;color:#0B2545;line-height:1.3;">${m.headline}</p>
+  <p style="margin:0;font-size:14px;color:#4A5568;line-height:1.7;">${m.body}</p>
+</td></tr>
+
 <!-- CTA -->
 <tr><td style="background:#0B2545;padding:32px;text-align:center;border-radius:0 0 12px 12px;">
-  <p style="margin:0 0 6px;font-size:11px;color:#B8973A;text-transform:uppercase;letter-spacing:.08em;font-weight:600;">Next step</p>
-  <p style="margin:0 0 6px;font-size:19px;color:#FFFFFF;font-weight:500;">Book your complimentary consultation</p>
-  <p style="margin:0 0 20px;font-size:13px;color:rgba(255,255,255,.65);">David will review your scores before the meeting — so your first session goes straight to what matters most.</p>
-  <a href="${BOOKING_LINK}" style="display:inline-block;background:#B8973A;color:#0B2545;font-size:14px;font-weight:700;padding:14px 32px;border-radius:8px;text-decoration:none;">Schedule a free consultation →</a>
-  <p style="margin:16px 0 0;font-size:11px;color:rgba(255,255,255,.4);">30-minute discovery call · No obligation · Alberta residents only</p>
-</td></tr>
+  <p style="margin:0 0 6px;font-size:11px;color:#B8973A;text-transform:uppercase;letter-spacing:.08em;font-weight:600;">Your next step</p>
+  <p style="margin:0 0 16px;font-size:14px;color:rgba(255,255,255,.8);line-height:1.7;max-width:480px;margin-left:auto;margin-right:auto;">${m.cta}</p>
+  <a href="${BOOKING_LINK}" style="display:inline-block;background:#B8973A;color:#0B2545;font-size:14px;font-weight:700;padding:14px 32px;border-radius:8px;text-decoration:none;">Book your free strategy session →</a>
+  <p style="margin:16px 0 0;font-size:11px;color:rgba(255,255,255,.4);">30-minute session · No obligation · Alberta residents only</p>
+</td></tr>`;})()}
 
 <!-- Footer -->
 <tr><td style="padding:20px 0;text-align:center;">
