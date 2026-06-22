@@ -521,9 +521,9 @@ body{
 const SUPABASE_URL = 'https://bohnnxsvejiqhxfhnzsi.supabase.co';            // e.g. https://xxxx.supabase.co
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvaG5ueHN2ZWppcWh4ZmhuenNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MTIwMDEsImV4cCI6MjA5NzM4ODAwMX0.Sfgdyz6yHFMX-YAvdoauT1vnKZC2_jGnTjfAgu4a1kU';  // your project anon public key
 const BOOKING_LINK = 'https://calendar.app.google/kBd2mhsKuEs7XB5h7';
-const RESEND_API_KEY = 're_KYSqXYr6_6iE8W8yKmKQp2Li6zrL8BTCs';
-const FROM_EMAIL = 'audit@davidmawo.ca';
-const ADVISOR_EMAIL = 'bmawodavid@gmail.com';
+// Email sent via serverless function — key stored server-side
+
+
 // ============================================================
 
 const PROFILE_QS = [
@@ -983,26 +983,15 @@ async function sendEmails(name, email, phone, scores, totalScore, tags, profile)
 </html>`;
 
   try {
-    // Send report to respondent
-    await fetch('https://api.resend.com/emails', {
+    await fetch('/.netlify/functions/send-email', {
       method: 'POST',
-      headers: {'Content-Type':'application/json','Authorization':`Bearer ${RESEND_API_KEY}`},
+      headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
-        from: `David B. Mawo, CFP <${FROM_EMAIL}>`,
-        to: [email],
-        subject: `Your Alberta Financial Literacy Report — ${totalScore}%`,
-        html: reportHtml
-      })
-    });
-    // Send notification to David
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','Authorization':`Bearer ${RESEND_API_KEY}`},
-      body: JSON.stringify({
-        from: `Audit System <${FROM_EMAIL}>`,
-        to: [ADVISOR_EMAIL],
-        subject: `New audit: ${name||email} — ${totalScore}% literacy score`,
-        html: advisorHtml
+        recipientEmail:   email,
+        recipientSubject: `Your Alberta Financial Literacy Report — ${totalScore}%`,
+        recipientHtml:    reportHtml,
+        advisorSubject:   `New audit: ${name||email} — ${totalScore}% literacy score`,
+        advisorHtml:      advisorHtml
       })
     });
   } catch(e) {
