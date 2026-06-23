@@ -472,7 +472,10 @@ body{
       <div class="header-name">David B. Mawo, LFSA</div>
       <div class="header-title">Financial Advisor · Alberta</div>
     </div>
-    <div class="header-badge">Alberta Financial Literacy Audit</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+    <div class="header-badge" id="header-badge-text">Alberta Financial Literacy Audit</div>
+    <button id="lang-toggle" onclick="toggleLang()" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;letter-spacing:.05em;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">FR</button>
+  </div>
   </div>
 </header>
 
@@ -489,28 +492,28 @@ body{
 <!-- Email capture modal -->
 <div class="modal-overlay" id="emailModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-box">
-    <h2 class="modal-title" id="modal-title">Receive your report by email</h2>
-    <p class="modal-sub">Enter your details and we'll send your personalized literacy report and recommended next steps — then you can book your complimentary consultation.</p>
+    <h2 class="modal-title" id="modal-title">${t('Receive your report by email','Recevoir votre bilan par courriel')}</h2>
+    <p class="modal-sub">${t("Enter your details and we'll send your personalized literacy report and recommended next steps — then you can book your complimentary consultation.","Entrez vos coordonnées et nous vous enverrons votre bilan de littératie personnalisé ainsi que les prochaines étapes recommandées.")}</p>
     <div class="form-group">
-      <label class="form-label" for="inp-name">Full name</label>
+      <label class="form-label" for="inp-name">${t('Full name','Nom complet')}</label>
       <input class="form-input" id="inp-name" type="text" placeholder="Your full name" autocomplete="name">
     </div>
     <div class="form-group">
-      <label class="form-label" for="inp-email">Email address</label>
+      <label class="form-label" for="inp-email">${t('Email address','Adresse courriel')}</label>
       <input class="form-input" id="inp-email" type="email" placeholder="your@email.com" autocomplete="email">
     </div>
     <div class="form-group">
-      <label class="form-label" for="inp-phone">Phone (optional)</label>
+      <label class="form-label" for="inp-phone">${t('Phone (optional)','Téléphone (facultatif)')}</label>
       <input class="form-input" id="inp-phone" type="tel" placeholder="+1 (780) 000-0000" autocomplete="tel">
     </div>
     <div id="submitStatus" class="submit-status"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Skip</button>
       <button class="btn btn-primary" id="submitBtn" onclick="submitLead()">
-        Send my report →
+        ${t('Send my report →','Envoyer mon bilan →')}
       </button>
     </div>
-    <p class="modal-disclaimer">Your information is private and will only be used to send your report and schedule your consultation. You may unsubscribe at any time.</p>
+    <p class="modal-disclaimer">${t('Your information is private and will only be used to send your report and schedule your consultation. You may unsubscribe at any time.','Vos informations sont privées et ne seront utilisées que pour envoyer votre bilan et planifier votre consultation. Vous pouvez vous désabonner à tout moment.')}</p>
   </div>
 </div>
 
@@ -521,37 +524,52 @@ body{
 const SUPABASE_URL = 'https://bohnnxsvejiqhxfhnzsi.supabase.co';            // e.g. https://xxxx.supabase.co
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvaG5ueHN2ZWppcWh4ZmhuenNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MTIwMDEsImV4cCI6MjA5NzM4ODAwMX0.Sfgdyz6yHFMX-YAvdoauT1vnKZC2_jGnTjfAgu4a1kU';  // your project anon public key
 const BOOKING_LINK = 'https://calendar.app.google/kBd2mhsKuEs7XB5h7';
+let LANG = 'en'; // 'en' or 'fr'
+
+function toggleLang() {
+  LANG = LANG === 'en' ? 'fr' : 'en';
+  const btn = document.getElementById('lang-toggle');
+  const badge = document.getElementById('header-badge-text');
+  if (btn) btn.textContent = LANG === 'en' ? 'FR' : 'EN';
+  if (badge) badge.textContent = LANG === 'en' ? 'Alberta Financial Literacy Audit' : 'Bilan de littératie financière — Alberta';
+  document.title = LANG === 'en'
+    ? 'Alberta Financial Literacy Audit | David B. Mawo, Financial Advisor'
+    : 'Bilan de littératie financière — Alberta | David B. Mawo, Conseiller financier';
+  render();
+}
+
+function t(en, fr) { return LANG === 'fr' ? fr : en; }
 // Email sent via serverless function — key stored server-side
 
 
 // ============================================================
 
-const PROFILE_QS = [
-  {id:'age', text:'What is your age range?', ctx:'Determines your retirement horizon, registered account priorities, and CPP/OAS planning relevance.', opts:[
-    {l:'Under 30',v:'u30'},{l:'30–44',v:'30s'},{l:'45–59',v:'40s'},{l:'60 or older',v:'60p'}
+function PROFILE_QS() { return [
+  {id:'age', text:t('What is your age range?','Dans quelle tranche d\'âge vous situez-vous?'), ctx:t('Determines your retirement horizon, registered account priorities, and CPP/OAS planning relevance.','Détermine votre horizon de retraite et vos priorités en matière de comptes enregistrés.'), opts:[
+    {l:t('Under 30','Moins de 30 ans'),v:'u30'},{l:t('30–44','30 à 44 ans'),v:'30s'},{l:t('45–59','45 à 59 ans'),v:'40s'},{l:t('60 or older','60 ans ou plus'),v:'60p'}
   ]},
-  {id:'income', text:'What is your approximate gross household income?', ctx:'Drives your marginal rate analysis, RRSP vs TFSA optimization, and corporate structure relevance.', opts:[
-    {l:'Under $60,000',v:'low'},{l:'$60,000–$120,000',v:'mid'},{l:'$120,000–$250,000',v:'high'},{l:'Over $250,000',v:'vhigh'}
+  {id:'income', text:t('What is your approximate gross household income?','Quel est le revenu brut approximatif de votre ménage?'), ctx:t('Drives your marginal rate analysis, RRSP vs TFSA optimization, and corporate structure relevance.','Oriente l\'analyse de votre taux marginal et l\'optimisation REER/CELI.'), opts:[
+    {l:t('Under $60,000','Moins de 60 000 $'),v:'low'},{l:t('$60,000–$120,000','60 000 $ – 120 000 $'),v:'mid'},{l:t('$120,000–$250,000','120 000 $ – 250 000 $'),v:'high'},{l:t('Over $250,000','Plus de 250 000 $'),v:'vhigh'}
   ]},
-  {id:'employ', text:'What best describes your employment situation?', ctx:'Self-employed and incorporated professionals face different insurance, tax, and planning needs.', opts:[
-    {l:'Salaried employee',v:'salary'},{l:'Contractor or freelancer',v:'contract'},{l:'Incorporated business owner',v:'corp'},{l:'Retired or semi-retired',v:'retired'}
+  {id:'employ', text:t('What best describes your employment situation?','Quelle description correspond le mieux à votre situation professionnelle?'), ctx:t('Self-employed and incorporated professionals face different insurance, tax, and planning needs.','Les travailleurs autonomes et incorporés ont des besoins distincts en assurance, fiscalité et planification.'), opts:[
+    {l:t('Salaried employee','Employé salarié'),v:'salary'},{l:t('Contractor or freelancer','Travailleur autonome ou contractuel'),v:'contract'},{l:t('Incorporated business owner','Propriétaire d\'entreprise incorporée'),v:'corp'},{l:t('Retired or semi-retired','Retraité ou semi-retraité'),v:'retired'}
   ]},
-  {id:'family', text:'What is your family situation?', ctx:'Children trigger RESP planning; spouses enable income splitting and spousal RRSP strategies.', opts:[
-    {l:'Single, no dependants',v:'single'},{l:'Couple, no children',v:'couple'},{l:'Family with children under 18',v:'kids'},{l:'Empty nester or dependant parents',v:'empty'}
+  {id:'family', text:t('What is your family situation?','Quelle est votre situation familiale?'), ctx:t('Children trigger RESP planning; spouses enable income splitting and spousal RRSP strategies.','Les enfants déclenchent la planification REEE; le conjoint permet le fractionnement du revenu.'), opts:[
+    {l:t('Single, no dependants','Célibataire, sans personnes à charge'),v:'single'},{l:t('Couple, no children','En couple, sans enfants'),v:'couple'},{l:t('Family with children under 18','Famille avec enfants de moins de 18 ans'),v:'kids'},{l:t('Empty nester or dependant parents','Enfants autonomes ou parents à charge'),v:'empty'}
   ]},
-  {id:'home', text:'What is your housing situation?', ctx:'Home ownership affects principal residence exemption, real estate equity, and estate complexity.', opts:[
-    {l:'Renting — no property',v:'rent'},{l:'Planning to buy a first home',v:'buying'},{l:'Own my primary residence',v:'own'},{l:'Own multiple properties or rental',v:'landlord'}
+  {id:'home', text:t('What is your housing situation?','Quelle est votre situation de logement?'), ctx:t('Home ownership affects principal residence exemption, real estate equity, and estate complexity.','La propriété affecte l\'exemption de résidence principale et la complexité successorale.'), opts:[
+    {l:t('Renting — no property','Locataire'),v:'rent'},{l:t('Planning to buy a first home','En processus d\'achat d\'une première propriété'),v:'buying'},{l:t('Own my primary residence','Propriétaire de ma résidence principale'),v:'own'},{l:t('Own multiple properties or rental','Propriétaire de plusieurs biens ou immobilier locatif'),v:'landlord'}
   ]},
-  {id:'savings', text:'How would you describe your current savings situation?', ctx:'Establishes baseline complexity and where the biggest financial leverage points exist.', opts:[
-    {l:'Saving less than I should — living paycheque to paycheque',v:'none'},{l:'Have some savings but no clear strategy',v:'some'},{l:'Investing regularly with a basic strategy',v:'invest'},{l:'Significant assets with a multi-account structure',v:'advanced'}
+  {id:'savings', text:t('How would you describe your current savings situation?','Comment décririez-vous votre situation d\'épargne actuelle?'), ctx:t('Establishes baseline complexity and where the biggest financial leverage points exist.','Établit la complexité de base et les principaux leviers financiers.'), opts:[
+    {l:t('Saving less than I should — living paycheque to paycheque','J\'épargne moins que je ne devrais — je vis d\'une paie à l\'autre'),v:'none'},{l:t('Have some savings but no clear strategy','J\'ai quelques épargnes mais pas de stratégie claire'),v:'some'},{l:t('Investing regularly with a basic strategy','J\'investis régulièrement avec une stratégie de base'),v:'invest'},{l:t('Significant assets with a multi-account structure','Des actifs importants avec une structure multi-comptes'),v:'advanced'}
   ]},
-  {id:'debt', text:'What is your primary debt situation?', ctx:'High-interest consumer debt almost always takes priority over investing.', opts:[
-    {l:'Significant consumer debt (credit cards, personal loans)',v:'consumer'},{l:'Mortgage only',v:'mortgage'},{l:'Mortgage plus student or vehicle loans',v:'mixed'},{l:'Essentially debt-free',v:'none_debt'}
+  {id:'debt', text:t('What is your primary debt situation?','Quelle est votre situation d\'endettement principale?'), ctx:t('High-interest consumer debt almost always takes priority over investing.','Les dettes à intérêt élevé priment presque toujours sur l\'investissement.'), opts:[
+    {l:t('Significant consumer debt (credit cards, personal loans)','Dettes à la consommation importantes (cartes de crédit, prêts personnels)'),v:'consumer'},{l:t('Mortgage only','Hypothèque seulement'),v:'mortgage'},{l:t('Mortgage plus student or vehicle loans','Hypothèque plus prêts étudiants ou automobiles'),v:'mixed'},{l:t('Essentially debt-free','Essentiellement sans dettes'),v:'none_debt'}
   ]},
-  {id:'insurance', text:'How would you describe your current insurance coverage?', ctx:'Insurance gaps can be catastrophic, especially for self-employed Albertans with no employer benefits.', opts:[
-    {l:'No meaningful personal insurance',v:'none_ins'},{l:'Group benefits through employer only',v:'group'},{l:'Some personal policies but unsure if adequate',v:'some_ins'},{l:'Comprehensive review done in last 2 years',v:'full'}
+  {id:'insurance', text:t('How would you describe your current insurance coverage?','Comment décririez-vous votre couverture d\'assurance actuelle?'), ctx:t('Insurance gaps can be catastrophic, especially for self-employed Albertans with no employer benefits.','Les lacunes en assurance peuvent être catastrophiques, surtout pour les travailleurs autonomes.'), opts:[
+    {l:t('No meaningful personal insurance','Pas d\'assurance personnelle significative'),v:'none_ins'},{l:t('Group benefits through employer only','Avantages collectifs via l\'employeur seulement'),v:'group'},{l:t('Some personal policies but unsure if adequate','Quelques polices personnelles mais incertain de leur adéquation'),v:'some_ins'},{l:t('Comprehensive review done in last 2 years','Révision complète effectuée au cours des 2 dernières années'),v:'full'}
   ]}
-];
+]; }
 
 const AWARENESS_QS = [
   {id:'a1',cat:'tax',text:'Alberta has no provincial sales tax (PST). How does this shape your financial planning?',ctx:'Tests understanding of Alberta&#39;s foundational tax advantage.',opts:[
@@ -647,11 +665,11 @@ const AWARENESS_QS = [
 ];
 
 const CAT_META = {
-  tax:{label:'Tax literacy',color:'#3C3489',bar:'#7F77DD',icon:'ti-receipt-tax'},
-  registered:{label:'Registered accounts',color:'#0F6E56',bar:'#1D9E75',icon:'ti-building-bank'},
-  investing:{label:'Investing concepts',color:'#185FA5',bar:'#378ADD',icon:'ti-trending-up'},
-  insurance:{label:'Insurance & protection',color:'#854F0B',bar:'#EF9F27',icon:'ti-shield-check'},
-  estate:{label:'Estate & legal',color:'#5F5E5A',bar:'#888780',icon:'ti-home-heart'},
+  tax:{label:LANG==='fr'?'Fiscalité':'Tax literacy',color:'#3C3489',bar:'#7F77DD',icon:'ti-receipt-tax'},
+  registered:{label:LANG==='fr'?'Comptes enregistrés':'Registered accounts',color:'#0F6E56',bar:'#1D9E75',icon:'ti-building-bank'},
+  investing:{label:LANG==='fr'?"Concepts d'investissement":'Investing concepts',color:'#185FA5',bar:'#378ADD',icon:'ti-trending-up'},
+  insurance:{label:LANG==='fr'?'Assurance et protection':'Insurance & protection',color:'#854F0B',bar:'#EF9F27',icon:'ti-shield-check'},
+  estate:{label:LANG==='fr'?'Succession et planification légale':'Estate & legal',color:'#5F5E5A',bar:'#888780',icon:'ti-home-heart'},
 };
 
 const profileAnswers = {};
@@ -700,19 +718,19 @@ function render(){
 function renderHero(app){
   app.innerHTML=`
     <div class="hero">
-      <p class="hero-eyebrow">Alberta · 2025</p>
-      <h1 class="hero-title">Your Personal Financial<br>Literacy Audit</h1>
-      <p class="hero-sub">A two-stage assessment that profiles your situation, then measures your financial understanding across five key domains — tailored to Alberta&#39;s unique tax and planning environment.</p>
+      <p class="hero-eyebrow">t('Alberta · 2025','Alberta · 2025')</p>
+      <h1 class="hero-title">t('Your Personal Financial<br>Literacy Audit','Votre bilan de littératie<br>financière personnelle')</h1>
+      <p class="hero-sub">t('A two-stage assessment that profiles your situation, then measures your financial understanding across five key domains — tailored to Alberta&#39;s unique tax and planning environment.','Un bilan en deux étapes qui établit votre profil, puis mesure votre compréhension financière dans cinq domaines clés — adapté à l&#39;environnement fiscal unique de l&#39;Alberta.')</p>
       <div class="hero-tags">
-        <span class="hero-tag">Tax literacy</span>
-        <span class="hero-tag">Registered accounts</span>
-        <span class="hero-tag">Insurance</span>
-        <span class="hero-tag">Investing</span>
-        <span class="hero-tag">Estate planning</span>
+        <span class="hero-tag">${LANG==='fr'?'Fiscalité':'Tax literacy'}</span>
+        <span class="hero-tag">${LANG==='fr'?'Comptes enregistrés':'Registered accounts'}</span>
+        <span class="hero-tag">${LANG==='fr'?'Assurance':'Insurance'}</span>
+        <span class="hero-tag">${LANG==='fr'?'Investissement':'Investing'}</span>
+        <span class="hero-tag">${LANG==='fr'?'Planification successorale':'Estate planning'}</span>
       </div>
       <div style="margin-top:28px">
-        <button class="btn btn-primary" style="max-width:260px;margin:0 auto;display:block;padding:14px 32px" onclick="startAudit()">Begin the audit →</button>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:10px">Takes approximately 8–12 minutes &nbsp;·&nbsp; Completely confidential</p>
+        <button class="btn btn-primary" style="max-width:260px;margin:0 auto;display:block;padding:14px 32px" onclick="startAudit()">${t('Begin the audit →','Commencer le bilan →')}</button>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:10px">${t('Takes approximately 8–12 minutes &nbsp;·&nbsp; Completely confidential','Environ 8 à 12 minutes &nbsp;·&nbsp; Entièrement confidentiel')}</p>
       </div>
     </div>`;
 }
@@ -720,24 +738,24 @@ function renderHero(app){
 function startAudit(){phase='profile';render()}
 
 function renderProfile(app){
-  const q = PROFILE_QS[profileIdx];
-  const pct = Math.round(profileIdx/PROFILE_QS.length*100);
+  const q = PROFILE_QS()[profileIdx];
+  const pct = Math.round(profileIdx/PROFILE_QS().length*100);
   app.innerHTML=`
     <div class="progress-wrap">
       <div class="progress-meta">
-        <span>Stage 1 of 2 — Your profile</span>
-        <span>${profileIdx+1} of ${PROFILE_QS.length}</span>
+        <span>${t('Stage 1 of 2 — Your profile','Étape 1 de 2 — Votre profil')}</span>
+        <span>${profileIdx+1} of ${PROFILE_QS().length}</span>
       </div>
       <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
       <div class="phase-dots">
-        ${PROFILE_QS.map((_,i)=>`<div class="phase-dot ${i<profileIdx?'done':i===profileIdx?'active':''}"></div>`).join('')}
+        ${PROFILE_QS().map((_,i)=>`<div class="phase-dot ${i<profileIdx?'done':i===profileIdx?'active':''}"></div>`).join('')}
       </div>
     </div>
     <span class="section-label" style="background:#0B254512;color:var(--navy)">
-      <i class="ti ti-user-circle" style="font-size:14px"></i>Profile question ${profileIdx+1}
+      <i class="ti ti-user-circle" style="font-size:14px"></i>${t('Profile question','Question de profil')} ${profileIdx+1}
     </span>
     <div class="q-card">
-      <p class="q-number">Profile · Question ${profileIdx+1}</p>
+      <p class="q-number">${t('Profile · Question','Profil · Question')} ${profileIdx+1}</p>
       <h2 class="q-text">${q.text}</h2>
       <p class="q-context">${q.ctx}</p>
       <div class="opts">
@@ -749,11 +767,11 @@ function renderProfile(app){
       </div>
     </div>
     <div class="nav-row">
-      <button class="btn btn-ghost" onclick="prevProfile()" ${profileIdx===0?'disabled':''}>← Back</button>
-      <button class="btn btn-primary" onclick="nextProfile()">${profileIdx===PROFILE_QS.length-1?'Start literacy questions →':'Next →'}</button>
+      <button class="btn btn-ghost" onclick="prevProfile()" ${profileIdx===0?'disabled':''}>${t('← Back','← Retour')}</button>
+      <button class="btn btn-primary" onclick="nextProfile()">${profileIdx===PROFILE_QS().length-1?t('Start literacy questions →','Commencer les questions →'):t('Next →','Suivant →')}</button>
     </div>
     <div style="text-align:right;margin-top:8px">
-      <button class="link-btn" onclick="skipToAware()">Skip profile, go to questions →</button>
+      <button class="link-btn" onclick="skipToAware()">${t('Skip profile, go to questions →','Passer le profil, aller aux questions →')}</button>
     </div>`;
 }
 
@@ -773,7 +791,7 @@ function selectProfile(id,val){
 }
 function prevProfile(){if(profileIdx>0){profileIdx--;render()}}
 function nextProfile(){
-  if(profileIdx<PROFILE_QS.length-1){profileIdx++;render();}
+  if(profileIdx<PROFILE_QS().length-1){profileIdx++;render();}
   else{activeAwareQs=buildAwareQs();awareCur=0;phase='aware';render();}
 }
 function skipToAware(){activeAwareQs=AWARENESS_QS.slice(0,12);awareCur=0;phase='aware';render()}
@@ -789,8 +807,8 @@ function renderAware(app){
   app.innerHTML=`
     <div class="progress-wrap">
       <div class="progress-meta">
-        <span>Stage 2 of 2 — Financial literacy</span>
-        <span>${answered} of ${total} answered</span>
+        <span>${t('Stage 2 of 2 — Financial literacy','Étape 2 de 2 — Littératie financière')}</span>
+        <span>${answered} ${t('of','sur')} ${total} ${t('answered','répondues')}</span>
       </div>
       <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
       <div class="phase-dots">
@@ -801,7 +819,7 @@ function renderAware(app){
       <i class="ti ${cm.icon}" style="font-size:13px"></i>${cm.label}
     </span>
     <div class="q-card">
-      <p class="q-number">Literacy · Question ${awareCur+1} of ${total}</p>
+      <p class="q-number">${t('Literacy · Question','Littératie · Question')} ${awareCur+1} ${t('of','sur')} ${total}</p>
       <h2 class="q-text">${q.text}</h2>
       <p class="q-context">${q.ctx}</p>
       <div class="opts">
@@ -810,18 +828,18 @@ function renderAware(app){
             <div class="odot"><div class="odot-inner"></div></div>
             <div>
               <div class="opt-text">${o.l}</div>
-              ${i===q.opts.length-1?`<div class="opt-best">↑ Most complete answer</div>`:''}
+              ${i===q.opts.length-1?`<div class="opt-best">${t('↑ Most complete answer','↑ Réponse la plus complète')}</div>`:''}
             </div>
           </div>`).join('')}
       </div>
     </div>
     <div class="nav-row">
       <button class="btn btn-ghost" onclick="prevAware()" ${awareCur===0?'disabled':''}>← Back</button>
-      <button class="btn btn-primary" onclick="nextAware()">${awareCur===total-1?'See my results →':'Next →'}</button>
+      <button class="btn btn-primary" onclick="nextAware()">${awareCur===total-1?t('See my results →','Voir mes résultats →'):t('Next →','Suivant →')}</button>
     </div>
     <div style="display:flex;justify-content:space-between;margin-top:8px">
       <button class="link-btn" onclick="prevAware()" style="visibility:${awareCur>0?'visible':'hidden'}">← Previous</button>
-      <button class="link-btn" onclick="goToResults()">Jump to results →</button>
+      <button class="link-btn" onclick="goToResults()">${t('Jump to results →','Passer aux résultats →')}</button>
     </div>`;
 }
 
@@ -894,131 +912,151 @@ function getPersonalizedMessage(profile, totalScore, tags) {
   const age    = profile.age    || '';
   const employ = profile.employ || '';
   const score  = totalScore;
+  const fr     = LANG === 'fr';
 
-  const BOOKING = 'In our first conversation, I will evaluate your current situation, identify the specific strategies that apply to you, and show you a financial projection comparing where you are headed today versus what an optimized plan could deliver. No obligation — just clarity.';
-  const CTA     = 'Book your free strategy session';
+  const BOOKING_EN = 'In our first conversation, I will evaluate your current situation, identify the specific strategies that apply to you, and show you a financial projection comparing where you are headed today versus what an optimized plan could deliver. No obligation — just clarity.';
+  const BOOKING_FR = 'Lors de notre première rencontre, j\'évaluerai votre situation actuelle, identifierai les stratégies qui s\'appliquent à votre cas, et vous présenterai une projection financière comparant votre trajectoire actuelle à ce qu\'un plan optimisé pourrait vous apporter. Sans engagement — juste de la clarté.';
+  const BOOKING    = fr ? BOOKING_FR : BOOKING_EN;
+  const CTA        = fr ? 'Réserver votre séance stratégique gratuite' : 'Book your free strategy session';
 
-  // ── Group 3: Incorporated ──────────────────────────────────────────────────
+  // ── Group 3: Incorporated ─────────────────────────────────────────────────
   if (employ === 'corp') {
     if (score <= 39) return {
-      headline: 'Your corporation may be working against you.',
-      body: 'Your results show that your retained earnings are likely being taxed inefficiently, and without the right structure you may be paying more personal tax than necessary. The Capital Dividend Account, corporate-owned life insurance, and the Insured Retirement Plan are strategies designed specifically for incorporated Albertans — and most have never been shown them. This conversation could be worth hundreds of thousands of dollars over your career.',
+      headline: fr ? 'Votre société pourrait travailler contre vous.' : 'Your corporation may be working against you.',
+      body: fr ? 'Vos résultats indiquent que vos bénéfices non répartis sont probablement imposés de façon inefficace et que, sans la bonne structure, vous payez peut-être plus d\'impôt personnel que nécessaire. Le compte de dividendes en capital, l\'assurance vie détenue par l\'entreprise et le régime de retraite individuel sont des stratégies conçues spécifiquement pour les professionnels incorporés albertains — et la plupart n\'en ont jamais entendu parler. Cette conversation pourrait valoir des centaines de milliers de dollars sur la durée de votre carrière.'
+           : 'Your results show that your retained earnings are likely being taxed inefficiently, and without the right structure you may be paying more personal tax than necessary. The Capital Dividend Account, corporate-owned life insurance, and the Insured Retirement Plan are strategies designed specifically for incorporated Albertans — and most have never been shown them. This conversation could be worth hundreds of thousands of dollars over your career.',
       cta: BOOKING + ' ' + CTA
     };
     if (score <= 69) return {
-      headline: 'You understand the basics — but gaps remain.',
-      body: 'Your results suggest you are likely leaving corporate tax advantages on the table. The difference between a good plan and an optimal one for an incorporated professional often comes down to one or two strategies — the CDA, CSV lending, or a properly structured buy-sell agreement. Let's identify exactly which ones apply to your situation.',
+      headline: fr ? 'Vous maîtrisez les bases — mais des lacunes subsistent.' : 'You understand the basics — but gaps remain.',
+      body: fr ? 'Vos résultats suggèrent que vous laissez probablement des avantages fiscaux corporatifs inexploités. La différence entre un bon plan et un plan optimal pour un professionnel incorporé tient souvent à une ou deux stratégies — le CDC, le prêt sur la valeur de rachat ou une convention d\'actionnaires bien structurée. Identifions ensemble celles qui s\'appliquent à votre situation.'
+           : 'Your results suggest you are likely leaving corporate tax advantages on the table. The difference between a good plan and an optimal one for an incorporated professional often comes down to one or two strategies — the CDA, CSV lending, or a properly structured buy-sell agreement. Let\'s identify exactly which ones apply to your situation.',
       cta: BOOKING + ' ' + CTA
     };
     return {
-      headline: 'Your financial literacy is exceptional.',
-      body: 'At your level, the conversation shifts from education to execution — ensuring your corporate structure, life insurance, and estate plan are fully integrated. The difference between good and optimal at this stage is significant and measurable.',
+      headline: fr ? 'Votre littératie financière est exceptionnelle.' : 'Your financial literacy is exceptional.',
+      body: fr ? 'À votre niveau, la conversation passe de l\'éducation à l\'exécution — s\'assurer que votre structure corporative, votre assurance vie et votre planification successorale sont pleinement intégrées. La différence entre bon et optimal à ce stade est significative et mesurable.'
+           : 'At your level, the conversation shifts from education to execution — ensuring your corporate structure, life insurance, and estate plan are fully integrated. The difference between good and optimal at this stage is significant and measurable.',
       cta: BOOKING + ' ' + CTA
     };
   }
 
-  // ── Group 4: Pre-retirees (45–59 or 60+) ──────────────────────────────────
+  // ── Group 4: Pre-retirees ─────────────────────────────────────────────────
   if (age === '40s' || age === '60p' || employ === 'retired') {
     if (score <= 39) return {
-      headline: 'Retirement is closer than your plan may be ready for.',
-      body: 'The decisions you make in the next 5–10 years — when to take CPP, how to draw down your RRSP, how to structure your estate — will determine your financial reality for the rest of your life. These are not decisions to leave to chance or revisit later. Let's build a clear roadmap while there is still time to optimize.',
+      headline: fr ? 'La retraite approche plus vite que votre plan ne le prévoit.' : 'Retirement is closer than your plan may be ready for.',
+      body: fr ? 'Les décisions que vous prendrez au cours des 5 à 10 prochaines années — quand prendre le RPC, comment décaisser votre REER, comment structurer votre succession — détermineront votre réalité financière pour le reste de votre vie. Ce ne sont pas des décisions à laisser au hasard ou à remettre à plus tard. Construisons une feuille de route claire pendant qu\'il est encore temps d\'optimiser.'
+           : 'The decisions you make in the next 5–10 years — when to take CPP, how to draw down your RRSP, how to structure your estate — will determine your financial reality for the rest of your life. These are not decisions to leave to chance or to revisit later. Let\'s build a clear roadmap while there is still time to optimize.',
       cta: BOOKING + ' ' + CTA
     };
     if (score <= 69) return {
-      headline: 'Good foundation — but critical gaps remain.',
-      body: 'Your results reveal gaps in RRIF drawdown strategy and estate planning that are extremely common at your stage. Many pre-retirees lose tens of thousands of dollars in unnecessary tax because of the order in which they draw from their accounts. A retirement income plan built now could make a significant difference to what you and your family keep.',
+      headline: fr ? 'Bonnes bases — mais des lacunes critiques subsistent.' : 'Good foundation — but critical gaps remain.',
+      body: fr ? 'Vos résultats révèlent des lacunes dans la stratégie de décaissement du FERR et la planification successorale, très courantes à votre étape. De nombreux préretraités perdent des dizaines de milliers de dollars en impôt inutile en raison de l\'ordre dans lequel ils puisent dans leurs comptes. Un plan de revenu de retraite établi maintenant pourrait faire une différence significative sur ce que vous et votre famille conserverez.'
+           : 'Your results reveal gaps in RRIF drawdown strategy and estate planning that are extremely common at your stage. Many pre-retirees lose tens of thousands of dollars in unnecessary tax because of the order in which they draw from their accounts. A retirement income plan built now could make a significant difference to what you and your family keep.',
       cta: BOOKING + ' ' + CTA
     };
     return {
-      headline: 'You are well positioned — now let's stress-test your plan.',
-      body: 'Your knowledge is strong. The opportunity at your stage is to validate your plan against real scenarios — market downturns, a health event, a surviving spouse — and ensure your estate plan reflects your current wishes and minimizes the tax burden on your estate.',
+      headline: fr ? 'Vous êtes bien positionné — validons maintenant votre plan.' : "You are well positioned — now let's stress-test your plan.",
+      body: fr ? 'Vos connaissances sont solides. L\'opportunité à votre étape est de soumettre votre plan à des scénarios réels — baisse des marchés, problème de santé, survie du conjoint — et de s\'assurer que votre planification successorale reflète vos volontés actuelles tout en minimisant le fardeau fiscal pour vos héritiers.'
+           : 'Your knowledge is strong. The opportunity at your stage is to validate your plan against real scenarios — market downturns, a health event, a surviving spouse — and ensure your estate plan reflects your current wishes and minimizes the tax burden on your estate.',
       cta: BOOKING + ' ' + CTA
     };
   }
 
-  // ── Group 1: Young professionals (Under 30) ────────────────────────────────
+  // ── Group 1: Young professionals ──────────────────────────────────────────
   if (age === 'u30') {
     if (score <= 39) return {
-      headline: 'You are earlier than you think — and that is your biggest advantage.',
-      body: 'Your results show you are just getting started with financial planning, and that is actually good news. The strategies that build the most wealth work best when started early. Your FHSA alone could save you up to $40,000 tax-free toward your first home, and a properly structured life insurance policy started at your age costs a fraction of what it will later. The gap between where you are and where you could be is closeable — but the window is short.',
+      headline: fr ? "Vous êtes plus tôt que vous ne le pensez — et c'est votre plus grand atout." : "You are earlier than you think — and that is your biggest advantage.",
+      body: fr ? "Vos résultats montrent que vous en êtes aux débuts de votre planification financière, et c'est une bonne nouvelle. Les stratégies qui bâtissent le plus de patrimoine fonctionnent mieux lorsqu'elles sont mises en place tôt. Votre CELIAPP seul pourrait vous faire économiser jusqu'à 40 000 $ à l'abri de l'impôt pour votre première propriété, et une police d'assurance vie bien structurée à votre âge coûte une fraction de ce qu'elle coûtera plus tard."
+           : "Your results show you are just getting started with financial planning, and that is actually good news. The strategies that build the most wealth work best when started early. Your FHSA alone could save you up to $40,000 tax-free toward your first home, and a properly structured life insurance policy started at your age costs a fraction of what it will later.",
       cta: BOOKING + ' ' + CTA
     };
     if (score <= 69) return {
-      headline: 'Solid foundation — but gaps will compound if left open.',
-      body: 'Your results reveal gaps in protection and tax strategy that could cost you significantly over the next decade. Most young professionals in your position are maximizing their TFSA but missing the FHSA and the right disability coverage. One conversation could close those gaps before they compound.',
+      headline: fr ? "Bonnes bases — mais les lacunes se compoundent si on les laisse ouvertes." : "Solid foundation — but gaps will compound if left open.",
+      body: fr ? "Vos résultats révèlent des lacunes en matière de protection et de stratégie fiscale qui pourraient vous coûter cher au cours de la prochaine décennie. La plupart des jeunes professionnels dans votre situation maximisent leur CELI mais oublient le CELIAPP et la bonne couverture d'invalidité. Une seule conversation pourrait combler ces lacunes avant qu'elles ne s'accumulent."
+           : "Your results reveal gaps in protection and tax strategy that could cost you significantly over the next decade. Most young professionals in your position are maximizing their TFSA but missing the FHSA and the right disability coverage. One conversation could close those gaps before they compound.",
       cta: BOOKING + ' ' + CTA
     };
     return {
-      headline: 'You are ahead of your peers — now let's optimize.',
-      body: 'The next level for someone at your stage is building a tax-efficient foundation that will serve you whether you stay salaried or move toward self-employment. Let's make sure your strategy is built for where you are going, not just where you are.',
+      headline: fr ? "Vous avez de l'avance sur vos pairs — optimisons maintenant." : "You are ahead of your peers — now let's optimize.",
+      body: fr ? "La prochaine étape pour quelqu'un à votre stade est de construire une base fiscalement efficace qui vous servira que vous restiez salarié ou que vous évoluyez vers le travail autonome. Assurons-nous que votre stratégie est bâtie pour là où vous allez, pas seulement pour là où vous êtes."
+           : "The next level for someone at your stage is building a tax-efficient foundation that will serve you whether you stay salaried or move toward self-employment. Let's make sure your strategy is built for where you are going, not just where you are.",
       cta: BOOKING + ' ' + CTA
     };
   }
 
-  // ── Group 2: Growing families (30–44, salaried with kids implied) ──────────
+  // ── Group 2: Growing families ─────────────────────────────────────────────
   if (age === '30s') {
     if (score <= 39) return {
-      headline: 'Your family may be more exposed than you realize.',
-      body: 'Your results reveal significant gaps — particularly around income protection and estate planning. If something happened to you tomorrow, would your family be financially secure? Most families at your stage are one disability or death away from a financial crisis they did not see coming. This is the most important conversation you can have right now.',
+      headline: fr ? 'Votre famille est peut-être plus exposée que vous ne le réalisez.' : 'Your family may be more exposed than you realize.',
+      body: fr ? "Vos résultats révèlent des lacunes importantes — notamment en matière de protection du revenu et de planification successorale. Si quelque chose vous arrivait demain, votre famille serait-elle financièrement en sécurité? La plupart des familles à votre étape sont à un seul événement — invalidité ou décès — d'une crise financière qu'elles n'ont pas vue venir."
+           : 'Your results reveal significant gaps — particularly around income protection and estate planning. If something happened to you tomorrow, would your family be financially secure? Most families at your stage are one disability or death away from a financial crisis they did not see coming.',
       cta: BOOKING + ' ' + CTA
     };
     if (score <= 69) return {
-      headline: 'You are doing several things right — but gaps remain.',
-      body: 'Your results show gaps in RESP optimization and life insurance structuring that are common at your stage. Many families are underinsured by 40% or more without realizing it. A 30-minute review could identify exactly where your plan is exposed and what it would cost to close those gaps.',
+      headline: fr ? 'Vous faites plusieurs choses bien — mais des lacunes subsistent.' : 'You are doing several things right — but gaps remain.',
+      body: fr ? "Vos résultats montrent des lacunes dans l'optimisation du REEE et la structuration de l'assurance vie, courantes à votre étape. De nombreuses familles sont sous-assurées de 40% ou plus sans le savoir. Une révision de 30 minutes pourrait identifier exactement où votre plan est exposé."
+           : 'Your results show gaps in RESP optimization and life insurance structuring that are common at your stage. Many families are underinsured by 40% or more without realizing it. A 30-minute review could identify exactly where your plan is exposed.',
       cta: BOOKING + ' ' + CTA
     };
     return {
-      headline: 'Your financial literacy is strong — now make it a system.',
-      body: 'The opportunity now is to ensure your protection, savings, and estate plan are working together rather than as separate products. Let's review whether your current coverage and beneficiary designations reflect where your family is today.',
+      headline: fr ? "Votre littératie financière est solide — faisons-en un système cohérent." : "Your financial literacy is strong — now make it a system.",
+      body: fr ? "L'opportunité maintenant est de s'assurer que votre protection, votre épargne et votre planification successorale fonctionnent ensemble plutôt que comme des produits séparés. Vérifions si vos couvertures actuelles et vos désignations de bénéficiaires reflètent la réalité de votre famille aujourd'hui."
+           : "The opportunity now is to ensure your protection, savings, and estate plan are working together rather than as separate products. Let's review whether your current coverage and beneficiary designations reflect where your family is today.",
       cta: BOOKING + ' ' + CTA
     };
   }
 
-  // ── Group 6: Contractors / freelancers (small business owners) ────────────
+  // ── Group 6: Contractors ──────────────────────────────────────────────────
   if (employ === 'contract') {
     if (score <= 39) return {
-      headline: 'Building a business without a financial foundation is high risk.',
-      body: 'Your results show that while you are building your business, your personal financial plan may be significantly exposed. Business owners without the right structure often have no pension, insufficient life and disability coverage, and no separation between personal and business risk. One health event or business disruption could undo years of work.',
+      headline: fr ? 'Bâtir une activité sans fondation financière est un risque élevé.' : 'Building a business without a financial foundation is high risk.',
+      body: fr ? "Vos résultats montrent que pendant que vous développez votre activité, votre plan financier personnel est peut-être significativement exposé. Les travailleurs autonomes sans la bonne structure n'ont souvent pas de régime de retraite, une couverture d'assurance insuffisante et aucune séparation entre le risque personnel et professionnel."
+           : 'Your results show that while you are building your business, your personal financial plan may be significantly exposed. Business owners without the right structure often have no pension, insufficient life and disability coverage, and no separation between personal and business risk.',
       cta: BOOKING + ' ' + CTA
     };
     if (score <= 69) return {
-      headline: 'Good awareness — but gaps your accountant may not flag.',
-      body: 'Your results reveal gaps in business succession planning and key person protection that are extremely common among independent contractors and small business owners. These are gaps your accountant may not flag because they fall outside their scope. Let's identify what is missing before it becomes a crisis.',
+      headline: fr ? "Bonne conscience — mais des lacunes que votre comptable ne signalera pas." : "Good awareness — but gaps your accountant may not flag.",
+      body: fr ? "Vos résultats révèlent des lacunes en planification de la relève et en protection de la personne clé, très courantes chez les travailleurs autonomes. Ce sont des lacunes que votre comptable ne signalera pas car elles sortent de son champ d'action."
+           : 'Your results reveal gaps in business succession planning and key person protection that are extremely common among independent contractors. These are gaps your accountant may not flag because they fall outside their scope.',
       cta: BOOKING + ' ' + CTA
     };
     return {
-      headline: 'Strong literacy — now integrate your personal and business plans.',
-      body: 'The opportunity now is to ensure your personal and business financial plans are fully integrated — particularly around succession, disability coverage, and your eventual transition out of the business. Let's make sure the value you have built is protected.',
+      headline: fr ? "Solide littératie — intégrons maintenant vos plans personnel et professionnel." : "Strong literacy — now integrate your personal and business plans.",
+      body: fr ? "L'opportunité maintenant est de s'assurer que vos plans financiers personnel et professionnel sont pleinement intégrés — notamment en matière de relève, de couverture invalidité et de votre éventuelle transition hors de l'activité."
+           : "The opportunity now is to ensure your personal and business financial plans are fully integrated — particularly around succession, disability coverage, and your eventual transition out of the business.",
       cta: BOOKING + ' ' + CTA
     };
   }
 
-  // ── Default (salaried, age not yet matched, or new Canadians) ─────────────
+  // ── Default ───────────────────────────────────────────────────────────────
   if (score <= 39) return {
-    headline: 'There is significant room to strengthen your financial position.',
-    body: 'Your results show that several key pillars of your financial plan have gaps that, left open, will cost you over time. The good news is that the right strategies — properly sequenced — can make a measurable difference to your financial trajectory. The Canadian system offers tools most people never fully use.',
+    headline: fr ? 'Il est possible de renforcer significativement votre position financière.' : 'There is significant room to strengthen your financial position.',
+    body: fr ? "Vos résultats montrent que plusieurs piliers clés de votre plan financier présentent des lacunes qui, si elles restent ouvertes, vous coûteront à long terme. La bonne nouvelle est que les bonnes stratégies — correctement séquencées — peuvent faire une différence mesurable sur votre trajectoire financière."
+         : "Your results show that several key pillars of your financial plan have gaps that, left open, will cost you over time. The right strategies — properly sequenced — can make a measurable difference to your financial trajectory.",
     cta: BOOKING + ' ' + CTA
   };
   if (score <= 69) return {
-    headline: 'You have a foundation — now let's build on it.',
-    body: 'Your results show you understand the basics but are likely missing some of the more powerful strategies available to you. The gap between a good financial plan and an optimal one is often one or two targeted decisions. Let's identify exactly which ones apply to your situation.',
+    headline: fr ? "Vous avez une base — construisons dessus." : "You have a foundation — now let's build on it.",
+    body: fr ? "Vos résultats montrent que vous comprenez les bases mais manquez probablement certaines des stratégies les plus puissantes à votre disposition. La différence entre un bon plan financier et un plan optimal tient souvent à une ou deux décisions ciblées."
+         : "Your results show you understand the basics but are likely missing some of the more powerful strategies available to you. The difference between a good financial plan and an optimal one is often one or two targeted decisions.",
     cta: BOOKING + ' ' + CTA
   };
   return {
-    headline: 'Your financial literacy is strong — let's validate your plan.',
-    body: 'At your level, the conversation is less about education and more about ensuring your existing plan is fully optimized and stress-tested. A second set of eyes from a specialist can confirm what is working and surface what may be quietly costing you.',
+    headline: fr ? "Votre littératie financière est solide — validons votre plan." : "Your financial literacy is strong — let's validate your plan.",
+    body: fr ? "À votre niveau, la conversation porte moins sur l'éducation que sur la validation et l'optimisation de votre plan existant. Un second regard spécialisé peut confirmer ce qui fonctionne et mettre en lumière ce qui vous coûte peut-être silencieusement."
+         : "At your level, the conversation is less about education and more about ensuring your existing plan is fully optimized and stress-tested. A second set of eyes from a specialist can confirm what is working and surface what may be quietly costing you.",
     cta: BOOKING + ' ' + CTA
   };
 }
-
 async function sendEmails(name, email, phone, scores, totalScore, tags, profile){
-  const tierLabel = totalScore>=80?'Strong literacy':totalScore>=60?'Developing':totalScore>=40?'Foundational':'Awareness gaps';
+  const tierLabel = totalScore>=80?LANG==='fr'?'Solide':'Strong literacy':totalScore>=60?LANG==='fr'?'En développement':'Developing':totalScore>=40?LANG==='fr'?'Bases à renforcer':'Foundational':LANG==='fr'?'Lacunes importantes':'Awareness gaps';
   const catRows = Object.entries({
-    tax:{label:'Tax literacy'},
-    registered:{label:'Registered accounts'},
-    investing:{label:'Investing concepts'},
-    insurance:{label:'Insurance & protection'},
-    estate:{label:'Estate & legal'}
+    tax:{label:LANG==='fr'?'Fiscalité':'Tax literacy'},
+    registered:{label:LANG==='fr'?'Comptes enregistrés':'Registered accounts'},
+    investing:{label:LANG==='fr'?"Concepts d'investissement":'Investing concepts'},
+    insurance:{label:LANG==='fr'?'Assurance et protection':'Insurance & protection'},
+    estate:{label:LANG==='fr'?'Succession et planification légale':'Estate & legal'}
   }).map(([k,m])=>{
     const d = scores[k];
     if(!d||d.possible===0) return '';
@@ -1039,13 +1077,13 @@ async function sendEmails(name, email, phone, scores, totalScore, tags, profile)
 
 <!-- Header -->
 <tr><td style="background:#0B2545;border-radius:12px 12px 0 0;padding:28px 32px;text-align:center;">
-  <p style="margin:0 0 4px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#B8973A;font-weight:600;">David B. Mawo, LFSA &nbsp;·&nbsp; Financial Advisor · Alberta</p>
-  <h1 style="margin:0;font-size:22px;color:#FFFFFF;font-weight:500;">Your Financial Literacy Report</h1>
+  <p style="margin:0 0 4px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#B8973A;font-weight:600;">David B. Mawo, LFSA &nbsp;·&nbsp; ${LANG==='fr'?'Conseiller financier · Alberta':'Financial Advisor · Alberta'}</p>
+  <h1 style="margin:0;font-size:22px;color:#FFFFFF;font-weight:500;">${LANG==='fr'?'Votre bilan de littératie financière':'Your Financial Literacy Report'}</h1>
 </td></tr>
 
 <!-- Score block -->
 <tr><td style="background:#FFFFFF;padding:32px;text-align:center;border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;">
-  <p style="margin:0 0 8px;font-size:13px;color:#8A95A3;text-transform:uppercase;letter-spacing:.06em;">Overall literacy score</p>
+  <p style="margin:0 0 8px;font-size:13px;color:#8A95A3;text-transform:uppercase;letter-spacing:.06em;">${LANG==='fr'?'Score global de littératie financière':'Overall literacy score'}</p>
   <p style="margin:0;font-size:56px;font-weight:600;color:#0B2545;line-height:1;">${totalScore}<span style="font-size:24px;color:#B8973A;">%</span></p>
   <span style="display:inline-block;margin-top:10px;padding:4px 16px;border-radius:99px;font-size:12px;font-weight:600;background:${totalScore>=80?'#E1F5EE':totalScore>=60?'#FAEEDA':totalScore>=40?'#E6F1FB':'#FCEBEB'};color:${totalScore>=80?'#0F6E56':totalScore>=60?'#854F0B':totalScore>=40?'#185FA5':'#A32D2D'};">${tierLabel}</span>
   ${tags.length?`<p style="margin:16px 0 0;font-size:12px;color:#8A95A3;">Your profile: <strong style="color:#0B2545;">${tags.join(' · ')}</strong></p>`:''}
@@ -1053,7 +1091,7 @@ async function sendEmails(name, email, phone, scores, totalScore, tags, profile)
 
 <!-- Category bars -->
 <tr><td style="background:#FFFFFF;padding:0 32px 24px;border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;">
-  <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#0B2545;">Understanding by topic</p>
+  <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#0B2545;">${LANG==='fr'?'Résultats par domaine':'Understanding by topic'}</p>
   <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
     ${catRows}
   </table>
@@ -1063,22 +1101,22 @@ async function sendEmails(name, email, phone, scores, totalScore, tags, profile)
 ${(()=>{const m=getPersonalizedMessage(profile,totalScore,tags);return `
 <!-- Personalized insight -->
 <tr><td style="background:#F8F9FB;padding:28px 32px;border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;">
-  <p style="margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#B8973A;font-weight:600;">What this means for you</p>
+  <p style="margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#B8973A;font-weight:600;">${LANG==='fr'?'Ce que cela signifie pour vous':'What this means for you'}</p>
   <p style="margin:0 0 10px;font-size:17px;font-weight:600;color:#0B2545;line-height:1.3;">${m.headline}</p>
   <p style="margin:0;font-size:14px;color:#4A5568;line-height:1.7;">${m.body}</p>
 </td></tr>
 
 <!-- CTA -->
 <tr><td style="background:#0B2545;padding:32px;text-align:center;border-radius:0 0 12px 12px;">
-  <p style="margin:0 0 6px;font-size:11px;color:#B8973A;text-transform:uppercase;letter-spacing:.08em;font-weight:600;">Your next step</p>
+  <p style="margin:0 0 6px;font-size:11px;color:#B8973A;text-transform:uppercase;letter-spacing:.08em;font-weight:600;">${LANG==='fr'?'Votre prochaine étape':'Your next step'}</p>
   <p style="margin:0 0 16px;font-size:14px;color:rgba(255,255,255,.8);line-height:1.7;max-width:480px;margin-left:auto;margin-right:auto;">${m.cta}</p>
-  <a href="${BOOKING_LINK}" style="display:inline-block;background:#B8973A;color:#0B2545;font-size:14px;font-weight:700;padding:14px 32px;border-radius:8px;text-decoration:none;">Book your free strategy session →</a>
-  <p style="margin:16px 0 0;font-size:11px;color:rgba(255,255,255,.4);">30-minute session · No obligation · Alberta residents only</p>
+  <a href="${BOOKING_LINK}" style="display:inline-block;background:#B8973A;color:#0B2545;font-size:14px;font-weight:700;padding:14px 32px;border-radius:8px;text-decoration:none;">${LANG==='fr'?'Réserver votre séance stratégique gratuite →':'Book your free strategy session →'}</a>
+  <p style="margin:16px 0 0;font-size:11px;color:rgba(255,255,255,.4);">${LANG==='fr'?"Séance de 30 minutes · Sans engagement · Résidents de l'Alberta":"30-minute session · No obligation · Alberta residents only"}</p>
 </td></tr>`;})()}
 
 <!-- Footer -->
 <tr><td style="padding:20px 0;text-align:center;">
-  <p style="margin:0;font-size:12px;color:#8A95A3;">This report is for educational purposes only and does not constitute personalized financial advice.<br>© 2025 David B. Mawo, Financial Advisor · Alberta</p>
+  <p style="margin:0;font-size:12px;color:#8A95A3;">${LANG==='fr'?'Ce rapport est fourni à titre éducatif uniquement et ne constitue pas un conseil financier personnalisé.<br>© 2025 David B. Mawo, Conseiller financier · Alberta':'This report is for educational purposes only and does not constitute personalized financial advice.<br>© 2025 David B. Mawo, Financial Advisor · Alberta'}</p>
 </td></tr>
 
 </table>
@@ -1118,9 +1156,9 @@ ${(()=>{const m=getPersonalizedMessage(profile,totalScore,tags);return `
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         recipientEmail:   email,
-        recipientSubject: `Your Alberta Financial Literacy Report — ${totalScore}%`,
+        recipientSubject: LANG==='fr' ? `Votre bilan de littératie financière — ${totalScore}%` : `Your Alberta Financial Literacy Report — ${totalScore}%`,
         recipientHtml:    reportHtml,
-        advisorSubject:   `New audit: ${name||email} — ${totalScore}% literacy score`,
+        advisorSubject:   `New audit${LANG==='fr'?' (FR)':''}: ${name||email} — ${totalScore}% literacy score`,
         advisorHtml:      advisorHtml
       })
     });
@@ -1175,12 +1213,12 @@ async function submitLead(){
     statusEl.textContent='✓ Sending your report…';
     // Send emails
     await sendEmails(name, email, phone, calcScores(), calcTotal(), profileTags(), profileAnswers);
-    statusEl.textContent='✓ Report sent! Check your inbox.';
+    statusEl.textContent='${t('✓ Report sent! Check your inbox.','✓ Bilan envoyé! Vérifiez votre boîte de réception.')}';
     setTimeout(()=>{closeModal();phase='results';render();},1500);
   } catch(e){
     statusEl.className='submit-status error';
     statusEl.textContent='Could not save — continuing to your results.';
-    btn.innerHTML='Send my report →';btn.disabled=false;
+    btn.innerHTML=t('Send my report →','Envoyer mon bilan →');btn.disabled=false;
     setTimeout(()=>{closeModal();phase='results';render();},2000);
   }
 }
@@ -1224,7 +1262,7 @@ function renderResults(app){
     <div class="results-header" role="region" aria-label="Your results">
       <p class="results-eyebrow">Your Alberta Financial Literacy Report</p>
       <div class="score-ring">${score}<span class="score-unit">%</span></div>
-      <p class="score-label">Overall literacy score · ${answered} of ${activeAwareQs.length} questions answered</p>
+      <p class="score-label">${LANG==='fr'?'Score global de littératie financière':'Overall literacy score'} · ${answered} ${t('of','sur')} ${activeAwareQs.length} ${t('questions answered','questions répondues')}</p>
       <span class="tier-pill" style="background:${t.bg};color:${t.col}">${t.label}</span>
     </div>
 
@@ -1235,7 +1273,7 @@ function renderResults(app){
 
   app.innerHTML += `
     <div class="cat-section">
-      <h2 class="cat-section-title">Understanding by topic</h2>
+      <h2 class="cat-section-title">${LANG==='fr'?'Résultats par domaine':'Understanding by topic'}</h2>
       ${Object.entries(CAT_META).map(([k,m])=>{
         const d=scores[k];if(!d||d.possible===0)return '';
         const p=Math.round(d.earned/d.possible*100);
@@ -1285,28 +1323,28 @@ function generateRecs(scores, totalScore){
   const p=k=>scores[k]?.possible>0?Math.round(scores[k].earned/scores[k].possible*100):100;
   const pr=profileAnswers;
 
-  if(p('tax')<60) recs.push({cat:'tax',tag:'Knowledge gap',title:'Understand your Alberta tax position',
+  if(p('tax')<60) recs.push({cat:'tax',tag:LANG==='fr'?'Lacune à combler':'Knowledge gap',title:LANG==='fr'?'Comprendre votre situation fiscale en Alberta':'Understand your Alberta tax position',
     body:`Alberta&#39;s flat 10% provincial rate is a structural advantage — but only if you know your combined marginal rate and use it to choose between RRSP and TFSA contributions, time income events, and structure investment returns.${pr.employ==='corp'?' As an incorporated owner, the ~37% gap between corporate (11%) and personal (48%) rates is your most powerful wealth-building lever.':''}`});
 
-  if(p('registered')<60) recs.push({cat:'registered',tag:'Knowledge gap',title:'Deepen your registered account literacy',
+  if(p('registered')<60) recs.push({cat:'registered',tag:'Knowledge gap',title:LANG==='fr'?'Approfondir votre connaissance des comptes enregistrés':'Deepen your registered account literacy',
     body:`The TFSA vs RRSP decision is not arbitrary — it depends on your marginal rate now vs expected rate at withdrawal.${pr.home==='buying'?' The FHSA is especially important for you — it&#39;s the only account combining a deduction with tax-free withdrawal for a first home.':''}&nbsp;${pr.family==='kids'?' The CESG adds 20% free on the first $2,500/year per child in an RESP — a guaranteed immediate return nothing else matches.':''}`});
 
-  if(p('investing')<60) recs.push({cat:'investing',tag:'Knowledge gap',title:'Build investing fundamentals',
+  if(p('investing')<60) recs.push({cat:'investing',tag:'Knowledge gap',title:LANG==='fr'?"Maîtriser les bases de l'investissement":'Build investing fundamentals',
     body:`Asset location (which investments in which accounts) and fee awareness are concepts that cost nothing to implement but add significantly over time.${pr.savings==='none'||pr.savings==='some'?' Start with a low-cost balanced ETF inside your TFSA — it outperforms most actively managed funds after fees.':' A 1% annual fee difference on your portfolio compounds into a very significant number over 20+ years — know exactly what you are paying.'}`});
 
-  if(p('insurance')<60&&(pr.employ==='contract'||pr.employ==='corp'||pr.family==='kids')) recs.push({cat:'insurance',tag:'Knowledge gap',title:'Understand your insurance exposure',
+  if(p('insurance')<60&&(pr.employ==='contract'||pr.employ==='corp'||pr.family==='kids')) recs.push({cat:'insurance',tag:'Knowledge gap',title:LANG==='fr'?"Comprendre votre exposition au risque d'assurance":'Understand your insurance exposure',
     body:pr.employ==='contract'?'As a contractor, you have no employer disability, no group benefits, and no sick leave. Understanding personal disability insurance — and its key terms (elimination period, benefit period, own-occupation definition) — is your single most important uninsured risk to address.':pr.employ==='corp'?'As an incorporated professional, corporate-owned life insurance feeding the Capital Dividend Account can be one of the most tax-efficient estate tools available. Understanding the CDA mechanism is worth your time.':'Insurance literacy means knowing what group benefits actually cover (usually less than assumed) and identifying the gaps a personal policy should fill.'});
 
-  if(p('estate')<60&&(pr.age==='40s'||pr.age==='60p'||pr.home==='own'||pr.home==='landlord'||pr.employ==='corp')) recs.push({cat:'estate',tag:'Knowledge gap',title:'Learn how Alberta estate law works',
+  if(p('estate')<60&&(pr.age==='40s'||pr.age==='60p'||pr.home==='own'||pr.home==='landlord'||pr.employ==='corp')) recs.push({cat:'estate',tag:'Knowledge gap',title:LANG==='fr'?'Comprendre le droit successoral en Alberta':'Learn how Alberta estate law works',
     body:`Without an Enduring Power of Attorney, incapacity requires court-supervised guardianship under Alberta&#39;s Adult Guardianship and Trusteeship Act — a process costing thousands and months. Understanding which assets bypass probate (registered accounts, life insurance, seg funds with named beneficiaries) is foundational.${pr.employ==='corp'?' Business succession for incorporated owners is particularly complex — a buy-sell agreement and succession plan should be documented before they are needed.':''}`});
 
-  if(totalScore>=60&&p('tax')>=60) recs.push({cat:'tax',tag:'Apply knowledge',title:'Move from understanding to implementation',
+  if(totalScore>=60&&p('tax')>=60) recs.push({cat:'tax',tag:LANG==='fr'?'Mettre en pratique':'Apply knowledge',title:LANG==='fr'?'Passer de la compréhension à la mise en œuvre':'Move from understanding to implementation',
     body:'Your literacy is solid — the gap between knowing and doing is now the issue. Book a session with a fee-only financial planner and a CPA. Bring a list of all accounts, insurance policies, and their beneficiary designations. The highest-ROI action at your knowledge level is a comprehensive annual review, not more reading.'});
 
-  if(pr.home==='buying'&&p('registered')<70) recs.push({cat:'registered',tag:'Apply knowledge',title:'FHSA is your highest-priority account right now',
+  if(pr.home==='buying'&&p('registered')<70) recs.push({cat:'registered',tag:'Apply knowledge',title:LANG==='fr'?'Le CELIAPP est votre compte prioritaire en ce moment':'FHSA is your highest-priority account right now',
     body:'Open an FHSA immediately — even before your first contribution. The 15-year eligibility clock starts at account opening. Contribute $8,000 this year for the deduction. Your down payment withdrawal will be completely tax-free. This beats both the RRSP Home Buyers\' Plan and a standalone TFSA for first-time buyers.'});
 
-  if(recs.length===0) recs.push({cat:'investing',tag:'Strong',title:'Maintain and refine your financial advantage',
+  if(recs.length===0) recs.push({cat:'investing',tag:LANG==='fr'?'Solide':'Strong',title:LANG==='fr'?'Maintenir et optimiser votre avantage financier':'Maintain and refine your financial advantage',
     body:'Your awareness scores are strong. The next level is staying current: the 2024 capital gains inclusion rate change, FHSA contribution limits, and corporate passive income rules all shifted recently. Schedule an annual review with a CPA to ensure your implementation matches your knowledge.'});
 
   return recs.slice(0,5);
