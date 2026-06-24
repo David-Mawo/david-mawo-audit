@@ -472,10 +472,7 @@ body{
       <div class="header-name">David B. Mawo, LFSA</div>
       <div class="header-title">Financial Advisor · Alberta</div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px">
     <div class="header-badge">Alberta Financial Literacy Audit</div>
-    <a href="/fr.html" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;text-decoration:none;">FR</a>
-  </div>
   </div>
 </header>
 
@@ -524,9 +521,9 @@ body{
 const SUPABASE_URL = 'https://bohnnxsvejiqhxfhnzsi.supabase.co';            // e.g. https://xxxx.supabase.co
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvaG5ueHN2ZWppcWh4ZmhuenNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MTIwMDEsImV4cCI6MjA5NzM4ODAwMX0.Sfgdyz6yHFMX-YAvdoauT1vnKZC2_jGnTjfAgu4a1kU';  // your project anon public key
 const BOOKING_LINK = 'https://calendar.app.google/kBd2mhsKuEs7XB5h7';
-// Email sent via serverless function — key stored server-side
-
-
+const RESEND_API_KEY = 're_KYSqXYr6_6iE8W8yKmKQp2Li6zrL8BTCs';
+const FROM_EMAIL = 'audit@davidmawo.ca';
+const ADVISOR_EMAIL = 'bmawodavid@gmail.com';
 // ============================================================
 
 const PROFILE_QS = [
@@ -892,55 +889,6 @@ async function saveAnonymousLead(){
   } catch(e){ console.log('Anonymous save failed:', e); }
 }
 
-function getPersonalizedMessage(profile, totalScore, tags) {
-  var age    = profile.age    || '';
-  var employ = profile.employ || '';
-  var score  = totalScore;
-  var BOOKING = 'In our first conversation, I will evaluate your current situation, identify the specific strategies that apply to you, and show you a financial projection comparing where you are headed today versus what an optimized plan could deliver. No obligation — just clarity.';
-  var CTA     = 'Book your free strategy session';
-  var band = score <= 39 ? 'low' : score <= 69 ? 'mid' : 'high';
-  var grpKey = employ === 'corp' ? 'corp'
-    : (age === '40s' || age === '60p' || employ === 'retired') ? 'retired'
-    : age === 'u30' ? 'u30'
-    : age === '30s' ? 'family'
-    : employ === 'contract' ? 'contract'
-    : 'default';
-  var EN = {
-    corp:{
-      low:{h:'Your corporation may be working against you.',b:'Your results show that your retained earnings are likely being taxed inefficiently. The Capital Dividend Account, corporate-owned life insurance, and the Insured Retirement Plan are strategies most incorporated Albertans have never been shown. This conversation could be worth hundreds of thousands of dollars over your career.'},
-      mid:{h:'You understand the basics — but gaps remain.',b:'Your results suggest you are likely leaving corporate tax advantages on the table. The difference between a good plan and an optimal one often comes down to one or two strategies — the CDA, CSV lending, or a properly structured buy-sell agreement.'},
-      high:{h:'Your financial literacy is exceptional.',b:'At your level, the conversation shifts from education to execution — ensuring your corporate structure, life insurance, and estate plan are fully integrated. The difference between good and optimal is significant and measurable.'}
-    },
-    retired:{
-      low:{h:'Retirement is closer than your plan may be ready for.',b:'The decisions you make in the next 5-10 years — when to take CPP, how to draw down your RRSP, how to structure your estate — will determine your financial reality for the rest of your life.'},
-      mid:{h:'Good foundation — but critical gaps remain.',b:'Your results reveal gaps in RRIF drawdown strategy and estate planning. Many pre-retirees lose tens of thousands of dollars in unnecessary tax because of the order in which they draw from their accounts.'},
-      high:{h:'You are well positioned — now let us stress-test your plan.',b:'Your knowledge is strong. The opportunity at your stage is to validate your plan against real scenarios — market downturns, a health event, a surviving spouse.'}
-    },
-    u30:{
-      low:{h:'You are earlier than you think — and that is your biggest advantage.',b:'Your FHSA alone could save you up to $40,000 tax-free toward your first home, and a properly structured life insurance policy started at your age costs a fraction of what it will later.'},
-      mid:{h:'Solid foundation — but gaps will compound if left open.',b:'Your results reveal gaps in protection and tax strategy that could cost you significantly over the next decade. Most young professionals miss the FHSA and the right disability coverage.'},
-      high:{h:'You are ahead of your peers — now let us optimize.',b:'The next level for someone at your stage is building a tax-efficient foundation that will serve you whether you stay salaried or move toward self-employment.'}
-    },
-    family:{
-      low:{h:'Your family may be more exposed than you realize.',b:'Your results reveal significant gaps — particularly around income protection and estate planning. Most families at your stage are one disability or death away from a financial crisis they did not see coming.'},
-      mid:{h:'You are doing several things right — but gaps remain.',b:'Your results show gaps in RESP optimization and life insurance structuring. Many families are underinsured by 40% or more without realizing it.'},
-      high:{h:'Your financial literacy is strong — now make it a system.',b:'The opportunity now is to ensure your protection, savings, and estate plan are working together rather than as separate products.'}
-    },
-    contract:{
-      low:{h:'Building a business without a financial foundation is high risk.',b:'Business owners without the right structure often have no pension, insufficient coverage, and no separation between personal and business risk.'},
-      mid:{h:'Good awareness — but gaps your accountant may not flag.',b:'Your results reveal gaps in business succession planning and key person protection that are extremely common among independent contractors.'},
-      high:{h:'Strong literacy — now integrate your personal and business plans.',b:'The opportunity now is to ensure your personal and business financial plans are fully integrated — particularly around succession and disability coverage.'}
-    },
-    default:{
-      low:{h:'There is significant room to strengthen your financial position.',b:'Several key pillars of your financial plan have gaps that, left open, will cost you over time. The right strategies — properly sequenced — can make a measurable difference.'},
-      mid:{h:'You have a foundation — now let us build on it.',b:'Your results show you understand the basics but are likely missing some of the more powerful strategies available to you.'},
-      high:{h:'Your financial literacy is strong — let us validate your plan.',b:'At your level, the conversation is less about education and more about ensuring your existing plan is fully optimized and stress-tested.'}
-    }
-  };
-  var g = EN[grpKey][band];
-  return {headline:g.h, body:g.b, cta:BOOKING+' '+CTA};
-}
-
 async function sendEmails(name, email, phone, scores, totalScore, tags, profile){
   const tierLabel = totalScore>=80?'Strong literacy':totalScore>=60?'Developing':totalScore>=40?'Foundational':'Awareness gaps';
   const catRows = Object.entries({
@@ -989,21 +937,14 @@ async function sendEmails(name, email, phone, scores, totalScore, tags, profile)
   </table>
 </td></tr>
 
-<!-- Personalized message + CTA -->
-\${(function(){
-  var m = getPersonalizedMessage(profile, totalScore, tags);
-  return '<tr><td style="background:#F8F9FB;padding:28px 32px;border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;">'
-    +'<p style="margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#B8973A;font-weight:600;">What this means for you</p>'
-    +'<p style="margin:0 0 10px;font-size:17px;font-weight:600;color:#0B2545;line-height:1.3;">'+m.headline+'</p>'
-    +'<p style="margin:0;font-size:14px;color:#4A5568;line-height:1.7;">'+m.body+'</p>'
-    +'</td></tr>'
-    +'<tr><td style="background:#0B2545;padding:32px;text-align:center;border-radius:0 0 12px 12px;">'
-    +'<p style="margin:0 0 6px;font-size:11px;color:#B8973A;text-transform:uppercase;letter-spacing:.08em;font-weight:600;">Your next step</p>'
-    +'<p style="margin:0 0 16px;font-size:13px;color:rgba(255,255,255,.8);line-height:1.7;max-width:480px;margin-left:auto;margin-right:auto;">'+m.cta+'</p>'
-    +'<a href="${BOOKING_LINK}" style="display:inline-block;background:#B8973A;color:#0B2545;font-size:14px;font-weight:700;padding:14px 32px;border-radius:8px;text-decoration:none;">Book your free strategy session →</a>'
-    +'<p style="margin:16px 0 0;font-size:11px;color:rgba(255,255,255,.4);">30-minute session · No obligation · Alberta residents only</p>'
-    +'</td></tr>';
-})()}
+<!-- CTA -->
+<tr><td style="background:#0B2545;padding:32px;text-align:center;border-radius:0 0 12px 12px;">
+  <p style="margin:0 0 6px;font-size:11px;color:#B8973A;text-transform:uppercase;letter-spacing:.08em;font-weight:600;">Next step</p>
+  <p style="margin:0 0 6px;font-size:19px;color:#FFFFFF;font-weight:500;">Book your complimentary consultation</p>
+  <p style="margin:0 0 20px;font-size:13px;color:rgba(255,255,255,.65);">David will review your scores before the meeting — so your first session goes straight to what matters most.</p>
+  <a href="${BOOKING_LINK}" style="display:inline-block;background:#B8973A;color:#0B2545;font-size:14px;font-weight:700;padding:14px 32px;border-radius:8px;text-decoration:none;">Schedule a free consultation →</a>
+  <p style="margin:16px 0 0;font-size:11px;color:rgba(255,255,255,.4);">30-minute discovery call · No obligation · Alberta residents only</p>
+</td></tr>
 
 <!-- Footer -->
 <tr><td style="padding:20px 0;text-align:center;">
@@ -1041,27 +982,28 @@ async function sendEmails(name, email, phone, scores, totalScore, tags, profile)
 </body>
 </html>`;
 
-  const RESEND_KEY = 're_KYSqXYr6_6iE8W8yKmKQp2Li6zrL8BTCs';
-  const FROM = 'audit@davidmawo.ca';
   try {
+    // Send report to respondent
     await fetch('https://api.resend.com/emails', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+RESEND_KEY},
-      body:JSON.stringify({
-        from:'David B. Mawo, LFSA <'+FROM+'>',
-        to:[email],
-        subject:'Your Alberta Financial Literacy Report — '+totalScore+'%',
-        html:reportHtml
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':`Bearer ${RESEND_API_KEY}`},
+      body: JSON.stringify({
+        from: `David B. Mawo, LFSA <${FROM_EMAIL}>`,
+        to: [email],
+        subject: `Your Alberta Financial Literacy Report — ${totalScore}%`,
+        html: reportHtml
       })
     });
+
+    // Send notification to David
     await fetch('https://api.resend.com/emails', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+RESEND_KEY},
-      body:JSON.stringify({
-        from:'Audit System <'+FROM+'>',
-        to:['bmawodavid@gmail.com'],
-        subject:'New audit: '+(name||email)+' — '+totalScore+'% literacy score',
-        html:advisorHtml
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':`Bearer ${RESEND_API_KEY}`},
+      body: JSON.stringify({
+        from: `Audit System <${FROM_EMAIL}>`,
+        to: [ADVISOR_EMAIL],
+        subject: `New audit: ${name||email} — ${totalScore}% literacy score`,
+        html: advisorHtml
       })
     });
   } catch(e) {
