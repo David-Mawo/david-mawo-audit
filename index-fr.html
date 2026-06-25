@@ -473,6 +473,7 @@ body{
       <div class="header-title">Conseiller financier · Alberta</div>
     </div>
     <div class="header-badge">Audit de littératie financière</div>
+    <a href="/index.html" class="lang-btn" style="margin-left:12px;padding:6px 14px;border:1.5px solid #B8973A;border-radius:99px;color:#B8973A;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.06em;">EN</a>
   </div>
 </header>
 
@@ -723,7 +724,7 @@ function renderProfile(app){
   app.innerHTML=`
     <div class="progress-wrap">
       <div class="progress-meta">
-        <span>Stage 1 of 2 — Your profile</span>
+        <span>Étape 1 sur 2 — Votre profil</span>
         <span>${profileIdx+1} of ${PROFILE_QS.length}</span>
       </div>
       <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
@@ -992,20 +993,20 @@ function renderResults(app){
 
   app.innerHTML=`
     <div class="results-header" role="region" aria-label="Your results">
-      <p class="results-eyebrow">Your Alberta Financial Literacy Report</p>
+      <p class="results-eyebrow">Votre rapport de littératie financière de l'Alberta</p>
       <div class="score-ring">${score}<span class="score-unit">%</span></div>
-      <p class="score-label">Overall literacy score · ${answered} of ${activeAwareQs.length} questions answered</p>
+      <p class="score-label">Score global de littératie · ${answered} sur ${activeAwareQs.length} questions répondues</p>
       <span class="tier-pill" style="background:${t.bg};color:${t.col}">${t.label}</span>
     </div>
 
     ${tags.length?`<div class="profile-bar">
-      <div class="profile-bar-label">Your profile</div>
+      <div class="profile-bar-label">Votre profil</div>
       <div class="profile-tags">${tags.map(t=>`<span class="ptag">${t}</span>`).join('')}</div>
     </div>`:''}`
 
   app.innerHTML += `
     <div class="cat-section">
-      <h2 class="cat-section-title">Understanding by topic</h2>
+      <h2 class="cat-section-title">Compréhension par sujet</h2>
       ${Object.entries(CAT_META).map(([k,m])=>{
         const d=scores[k];if(!d||d.possible===0)return '';
         const p=Math.round(d.earned/d.possible*100);
@@ -1018,7 +1019,7 @@ function renderResults(app){
       }).join('')}
     </div>
 
-    <h2 class="cat-section-title" style="margin-bottom:12px">Your personalized action plan</h2>
+    <h2 class="cat-section-title" style="margin-bottom:12px">Votre plan d'action personnalisé</h2>
     ${recs.map(r=>`
       <div class="rec-card" role="article">
         <div class="rec-head">
@@ -1034,19 +1035,19 @@ function renderResults(app){
       </div>`).join('')}
 
     <div class="booking-cta" role="complementary" aria-label="Book a consultation">
-      <p class="booking-eyebrow">Next step</p>
-      <h2 class="booking-title">Book your complimentary<br>financial consultation</h2>
-      <p class="booking-sub">Your results show where to focus. David will review your profile and literacy scores before the meeting — so your first session goes straight to what matters most for your situation.</p>
+      <p class="booking-eyebrow">Prochaine étape</p>
+      <h2 class="booking-title">Réservez votre consultation<br>financière gratuite</h2>
+      <p class="booking-sub">Vos résultats montrent où concentrer vos efforts. David examinera votre profil et vos scores avant la rencontre — afin que votre première séance aille directement à l'essentiel pour votre situation.</p>
       <a href="${BOOKING_LINK}" target="_blank" rel="noopener" class="booking-btn" aria-label="Book a consultation with David B. Mawo">
         <i class="ti ti-calendar-event" style="font-size:18px"></i>
-        Schedule a free consultation
+        Planifier une consultation gratuite
       </a>
-      <p class="booking-note">30-minute discovery call &nbsp;·&nbsp; No obligation &nbsp;·&nbsp; Alberta residents only</p>
+      <p class="booking-note">Appel découverte de 30 min &nbsp;·&nbsp; Sans obligation &nbsp;·&nbsp; Résidents de l'Alberta</p>
     </div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px">
-      <button class="btn btn-ghost" onclick="restart()">Retake the audit</button>
-      <button class="btn btn-primary" onclick="window.print()"><i class="ti ti-printer" style="font-size:14px;margin-right:4px"></i>Print / Save PDF</button>
+      <button class="btn btn-ghost" onclick="restart()">Reprendre l'audit</button>
+      <button class="btn btn-primary" onclick="window.print()"><i class="ti ti-printer" style="font-size:14px;margin-right:4px"></i>Imprimer / Sauvegarder PDF</button>
     </div>`;
 }
 
