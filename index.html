@@ -521,9 +521,9 @@ body{
 const SUPABASE_URL = 'https://bohnnxsvejiqhxfhnzsi.supabase.co';            // e.g. https://xxxx.supabase.co
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJvaG5ueHN2ZWppcWh4ZmhuenNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MTIwMDEsImV4cCI6MjA5NzM4ODAwMX0.Sfgdyz6yHFMX-YAvdoauT1vnKZC2_jGnTjfAgu4a1kU';  // your project anon public key
 const BOOKING_LINK = 'https://calendar.app.google/kBd2mhsKuEs7XB5h7';
-const RESEND_API_KEY = 're_KYSqXYr6_6iE8W8yKmKQp2Li6zrL8BTCs';
-const FROM_EMAIL = 'audit@davidmawo.ca';
-const ADVISOR_EMAIL = 'bmawodavid@gmail.com';
+// Email handled by serverless function
+
+
 // ============================================================
 
 const PROFILE_QS = [
@@ -890,121 +890,11 @@ async function saveAnonymousLead(){
 }
 
 async function sendEmails(name, email, phone, scores, totalScore, tags, profile){
-  const tierLabel = totalScore>=80?'Strong literacy':totalScore>=60?'Developing':totalScore>=40?'Foundational':'Awareness gaps';
-  const catRows = Object.entries({
-    tax:{label:'Tax literacy'},
-    registered:{label:'Registered accounts'},
-    investing:{label:'Investing concepts'},
-    insurance:{label:'Insurance & protection'},
-    estate:{label:'Estate & legal'}
-  }).map(([k,m])=>{
-    const d = scores[k];
-    if(!d||d.possible===0) return '';
-    const pct = Math.round(d.earned/d.possible*100);
-    const color = pct>=75?'#1D9E75':pct>=40?'#EF9F27':'#E24B4A';
-    return `<tr><td style="padding:8px 12px;font-size:13px;color:#4A5568;">${m.label}</td><td style="padding:8px 12px;"><div style="background:#EEE;border-radius:99px;height:8px;width:100%;"><div style="background:${color};height:8px;border-radius:99px;width:${pct}%"></div></div></td><td style="padding:8px 12px;font-size:13px;font-weight:500;color:#1A1A2E;">${pct}%</td></tr>`;
-  }).join('');
-
-  // Respondent report email
-  const reportHtml = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#F5F5F0;font-family:'Inter',Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F5F0;padding:32px 16px;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-
-<!-- Header -->
-<tr><td style="background:#0B2545;border-radius:12px 12px 0 0;padding:28px 32px;text-align:center;">
-  <p style="margin:0 0 4px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#B8973A;font-weight:600;">David B. Mawo, LFSA &nbsp;·&nbsp; Financial Advisor · Alberta</p>
-  <h1 style="margin:0;font-size:22px;color:#FFFFFF;font-weight:500;">Your Financial Literacy Report</h1>
-</td></tr>
-
-<!-- Score block -->
-<tr><td style="background:#FFFFFF;padding:32px;text-align:center;border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;">
-  <p style="margin:0 0 8px;font-size:13px;color:#8A95A3;text-transform:uppercase;letter-spacing:.06em;">Overall literacy score</p>
-  <p style="margin:0;font-size:56px;font-weight:600;color:#0B2545;line-height:1;">${totalScore}<span style="font-size:24px;color:#B8973A;">%</span></p>
-  <span style="display:inline-block;margin-top:10px;padding:4px 16px;border-radius:99px;font-size:12px;font-weight:600;background:${totalScore>=80?'#E1F5EE':totalScore>=60?'#FAEEDA':totalScore>=40?'#E6F1FB':'#FCEBEB'};color:${totalScore>=80?'#0F6E56':totalScore>=60?'#854F0B':totalScore>=40?'#185FA5':'#A32D2D'};">${tierLabel}</span>
-  ${tags.length?`<p style="margin:16px 0 0;font-size:12px;color:#8A95A3;">Your profile: <strong style="color:#0B2545;">${tags.join(' · ')}</strong></p>`:''}
-</td></tr>
-
-<!-- Category bars -->
-<tr><td style="background:#FFFFFF;padding:0 32px 24px;border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;">
-  <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#0B2545;">Understanding by topic</p>
-  <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-    ${catRows}
-  </table>
-</td></tr>
-
-<!-- CTA -->
-<tr><td style="background:#0B2545;padding:32px;text-align:center;border-radius:0 0 12px 12px;">
-  <p style="margin:0 0 6px;font-size:11px;color:#B8973A;text-transform:uppercase;letter-spacing:.08em;font-weight:600;">Next step</p>
-  <p style="margin:0 0 6px;font-size:19px;color:#FFFFFF;font-weight:500;">Book your complimentary consultation</p>
-  <p style="margin:0 0 20px;font-size:13px;color:rgba(255,255,255,.65);">David will review your scores before the meeting — so your first session goes straight to what matters most.</p>
-  <a href="${BOOKING_LINK}" style="display:inline-block;background:#B8973A;color:#0B2545;font-size:14px;font-weight:700;padding:14px 32px;border-radius:8px;text-decoration:none;">Schedule a free consultation →</a>
-  <p style="margin:16px 0 0;font-size:11px;color:rgba(255,255,255,.4);">30-minute discovery call · No obligation · Alberta residents only</p>
-</td></tr>
-
-<!-- Footer -->
-<tr><td style="padding:20px 0;text-align:center;">
-  <p style="margin:0;font-size:12px;color:#8A95A3;">This report is for educational purposes only and does not constitute personalized financial advice.<br>© 2025 David B. Mawo, Financial Advisor · Alberta</p>
-</td></tr>
-
-</table>
-</td></tr>
-</table>
-</body>
-</html>`;
-
-  // Advisor notification email
-  const advisorHtml = `
-<!DOCTYPE html>
-<html>
-<body style="font-family:Arial,sans-serif;background:#F5F5F0;padding:24px;">
-<div style="max-width:560px;margin:0 auto;background:#fff;border-radius:10px;padding:28px;border:1px solid #E2E8F0;">
-  <h2 style="margin:0 0 4px;color:#0B2545;font-size:18px;">New audit submission</h2>
-  <p style="margin:0 0 20px;font-size:13px;color:#8A95A3;">A prospect just completed the Alberta Financial Literacy Audit</p>
-  <table width="100%" cellpadding="0" cellspacing="4">
-    <tr><td style="font-size:13px;color:#8A95A3;padding:6px 0;width:120px;">Name</td><td style="font-size:13px;font-weight:600;color:#1A1A2E;">${name||'Not provided'}</td></tr>
-    <tr><td style="font-size:13px;color:#8A95A3;padding:6px 0;">Email</td><td style="font-size:13px;font-weight:600;color:#1A1A2E;">${email}</td></tr>
-    <tr><td style="font-size:13px;color:#8A95A3;padding:6px 0;">Phone</td><td style="font-size:13px;font-weight:600;color:#1A1A2E;">${phone||'Not provided'}</td></tr>
-    <tr><td style="font-size:13px;color:#8A95A3;padding:6px 0;">Score</td><td style="font-size:13px;font-weight:600;color:#0B2545;">${totalScore}% — ${tierLabel}</td></tr>
-    <tr><td style="font-size:13px;color:#8A95A3;padding:6px 0;">Profile</td><td style="font-size:13px;font-weight:600;color:#1A1A2E;">${tags.join(', ')||'Not completed'}</td></tr>
-    <tr><td style="font-size:13px;color:#8A95A3;padding:6px 0;">Submitted</td><td style="font-size:13px;color:#1A1A2E;">${new Date().toLocaleString('en-CA',{timeZone:'America/Edmonton'})}</td></tr>
-  </table>
-  <div style="margin-top:20px;padding:14px;background:#F5F5F0;border-radius:8px;">
-    <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#0B2545;">Category breakdown</p>
-    ${catRows.replace(/<tr>/g,'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">').replace(/<\/tr>/g,'</div>').replace(/<td[^>]*>/g,'<span style="font-size:12px;min-width:130px;color:#4A5568;">').replace(/<\/td>/g,'</span>')}
-  </div>
-  <p style="margin:20px 0 0;font-size:12px;color:#8A95A3;">View all leads in your <a href="https://supabase.com/dashboard/project/bohnnxsvejiqhxfhnzsi/editor/17559" style="color:#185FA5;">Supabase dashboard</a></p>
-</div>
-</body>
-</html>`;
-
   try {
-    // Send report to respondent
-    await fetch('https://api.resend.com/emails', {
+    await fetch('/.netlify/functions/send-email', {
       method: 'POST',
-      headers: {'Content-Type':'application/json','Authorization':`Bearer ${RESEND_API_KEY}`},
-      body: JSON.stringify({
-        from: `David B. Mawo, LFSA <${FROM_EMAIL}>`,
-        to: [email],
-        subject: `Your Alberta Financial Literacy Report — ${totalScore}%`,
-        html: reportHtml
-      })
-    });
-
-    // Send notification to David
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','Authorization':`Bearer ${RESEND_API_KEY}`},
-      body: JSON.stringify({
-        from: `Audit System <${FROM_EMAIL}>`,
-        to: [ADVISOR_EMAIL],
-        subject: `New audit: ${name||email} — ${totalScore}% literacy score`,
-        html: advisorHtml
-      })
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name, email, phone, scores, totalScore, tags, profile})
     });
   } catch(e) {
     console.log('Email send error:', e);
